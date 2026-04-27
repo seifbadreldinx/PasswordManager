@@ -20,6 +20,7 @@ class PasswordManagerUI(QWidget):
 
         self.master_password = master_password
         self.current_data = []
+        self.passwords_visible = False
 
         create_table()
 
@@ -85,13 +86,26 @@ class PasswordManagerUI(QWidget):
         btn2.clicked.connect(self.save)
         layout.addWidget(btn2)
 
-        btn3 = QPushButton("Show Passwords")
+        btn3 = QPushButton("Refresh Vault")
         btn3.clicked.connect(self.show_data)
         layout.addWidget(btn3)
 
+        btn_row = QHBoxLayout()
+
         btn4 = QPushButton("Delete Selected")
         btn4.clicked.connect(self.delete_selected)
-        layout.addWidget(btn4)
+        btn_row.addWidget(btn4)
+
+        btn5 = QPushButton("Copy Password")
+        btn5.clicked.connect(self.copy_selected_password)
+        btn_row.addWidget(btn5)
+
+        self.reveal_btn = QPushButton("Show Passwords")
+        self.reveal_btn.setCheckable(True)
+        self.reveal_btn.toggled.connect(self._toggle_reveal)
+        btn_row.addWidget(self.reveal_btn)
+
+        layout.addLayout(btn_row)
 
         self.table = QTableWidget()
         self.table.setColumnCount(4)
@@ -181,6 +195,30 @@ class PasswordManagerUI(QWidget):
 
         self.show_data()
 
+    # Copy selected password to clipboard
+    def copy_selected_password(self):
+        selected = self.table.currentRow()
+
+        if selected < 0:
+            QMessageBox.warning(self, "Warning", "Select a row to copy")
+            return
+
+        pwd = self.current_data[selected][3]
+        if pwd is None:
+            QMessageBox.warning(self, "Error", "Could not decrypt password")
+            return
+
+        clipboard = QApplication.clipboard()
+        clipboard.setText(pwd)
+        QTimer.singleShot(10000, lambda: clipboard.clear())
+        QMessageBox.information(self, "Copied", "Password copied. Clipboard clears in 10 seconds.")
+
+    # Toggle password visibility in table
+    def _toggle_reveal(self, checked):
+        self.passwords_visible = checked
+        self.reveal_btn.setText("Hide Passwords" if checked else "Show Passwords")
+        self.show_data()
+
     # Delete selected password
     def delete_selected(self):
         selected = self.table.currentRow()
@@ -209,9 +247,10 @@ class PasswordManagerUI(QWidget):
         self.table.setRowCount(len(self.current_data))
 
         for i, row in enumerate(self.current_data):
+            pwd_display = row[3] if self.passwords_visible else "••••••••"
             self.table.setItem(i, 0, QTableWidgetItem(row[1]))
             self.table.setItem(i, 1, QTableWidgetItem(row[2]))
-            self.table.setItem(i, 2, QTableWidgetItem(row[3]))
+            self.table.setItem(i, 2, QTableWidgetItem(pwd_display))
             self.table.setItem(i, 3, QTableWidgetItem(row[4]))
 
     # Clear clipboard on close
