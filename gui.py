@@ -21,6 +21,7 @@ class PasswordManagerUI(QWidget):
         self.master_password = master_password
         self.current_data = []
         self.passwords_visible = False
+        self.is_dark_mode = True
 
         create_table()
 
@@ -31,66 +32,59 @@ class PasswordManagerUI(QWidget):
         self.ui()
         self.show_data()
 
+    DARK_STYLE = """
+        QWidget { background-color: #1e1e2e; color: #cdd6f4;
+                  font-family: Segoe UI, Arial, sans-serif; font-size: 13px; }
+        QLineEdit, QComboBox, QSpinBox { background-color: #313244; border: 1px solid #45475a;
+            border-radius: 6px; padding: 6px 10px; color: #cdd6f4; }
+        QLineEdit:focus, QComboBox:focus, QSpinBox:focus { border: 1px solid #89b4fa; }
+        QPushButton { background-color: #89b4fa; color: #1e1e2e; border: none;
+            border-radius: 6px; padding: 7px 14px; font-weight: bold; }
+        QPushButton:hover { background-color: #b4befe; }
+        QPushButton:pressed { background-color: #74c7ec; }
+        QPushButton:checked { background-color: #a6e3a1; color: #1e1e2e; }
+        QTableWidget { background-color: #313244; gridline-color: #45475a;
+            border: none; border-radius: 6px; }
+        QHeaderView::section { background-color: #45475a; color: #cdd6f4;
+            padding: 6px; border: none; font-weight: bold; }
+        QTableWidget::item:selected { background-color: #89b4fa; color: #1e1e2e; }
+        QLabel { color: #cdd6f4; }
+    """
+
+    LIGHT_STYLE = """
+        QWidget { background-color: #eff1f5; color: #4c4f69;
+                  font-family: Segoe UI, Arial, sans-serif; font-size: 13px; }
+        QLineEdit, QComboBox, QSpinBox { background-color: #ffffff; border: 1px solid #bcc0cc;
+            border-radius: 6px; padding: 6px 10px; color: #4c4f69; }
+        QLineEdit:focus, QComboBox:focus, QSpinBox:focus { border: 1px solid #1e66f5; }
+        QPushButton { background-color: #1e66f5; color: #ffffff; border: none;
+            border-radius: 6px; padding: 7px 14px; font-weight: bold; }
+        QPushButton:hover { background-color: #209fb5; }
+        QPushButton:pressed { background-color: #04a5e5; }
+        QPushButton:checked { background-color: #40a02b; color: #ffffff; }
+        QTableWidget { background-color: #ffffff; gridline-color: #bcc0cc;
+            border: none; border-radius: 6px; }
+        QHeaderView::section { background-color: #dce0e8; color: #4c4f69;
+            padding: 6px; border: none; font-weight: bold; }
+        QTableWidget::item:selected { background-color: #1e66f5; color: #ffffff; }
+        QLabel { color: #4c4f69; }
+    """
+
     def _apply_style(self):
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #1e1e2e;
-                color: #cdd6f4;
-                font-family: Segoe UI, Arial, sans-serif;
-                font-size: 13px;
-            }
-            QLineEdit, QComboBox, QSpinBox {
-                background-color: #313244;
-                border: 1px solid #45475a;
-                border-radius: 6px;
-                padding: 6px 10px;
-                color: #cdd6f4;
-            }
-            QLineEdit:focus, QComboBox:focus, QSpinBox:focus {
-                border: 1px solid #89b4fa;
-            }
-            QPushButton {
-                background-color: #89b4fa;
-                color: #1e1e2e;
-                border: none;
-                border-radius: 6px;
-                padding: 7px 14px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #b4befe;
-            }
-            QPushButton:pressed {
-                background-color: #74c7ec;
-            }
-            QPushButton:checked {
-                background-color: #a6e3a1;
-                color: #1e1e2e;
-            }
-            QTableWidget {
-                background-color: #313244;
-                gridline-color: #45475a;
-                border: none;
-                border-radius: 6px;
-            }
-            QHeaderView::section {
-                background-color: #45475a;
-                color: #cdd6f4;
-                padding: 6px;
-                border: none;
-                font-weight: bold;
-            }
-            QTableWidget::item:selected {
-                background-color: #89b4fa;
-                color: #1e1e2e;
-            }
-            QLabel {
-                color: #cdd6f4;
-            }
-        """)
+        self.setStyleSheet(self.DARK_STYLE if self.is_dark_mode else self.LIGHT_STYLE)
 
     def ui(self):
         layout = QVBoxLayout()
+
+        # Theme toggle pinned to top-right
+        top_row = QHBoxLayout()
+        top_row.addStretch()
+        self.theme_btn = QPushButton("☀  Light Mode")
+        self.theme_btn.setCheckable(True)
+        self.theme_btn.setFixedWidth(140)
+        self.theme_btn.toggled.connect(self._toggle_theme)
+        top_row.addWidget(self.theme_btn)
+        layout.addLayout(top_row)
 
         self.site = QLineEdit()
         self.site.setPlaceholderText("Site")
@@ -176,6 +170,14 @@ class PasswordManagerUI(QWidget):
         layout.addWidget(self.table)
 
         self.setLayout(layout)
+
+    # Toggle dark / light theme
+    def _toggle_theme(self, checked):
+        self.is_dark_mode = not checked
+        self.theme_btn.setText("🌙  Dark Mode" if checked else "☀  Light Mode")
+        self._apply_style()
+        # Re-apply dynamic strength label color
+        self._update_strength_indicator(self.password.text())
 
     # Live strength indicator
     def _update_strength_indicator(self, text):
