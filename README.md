@@ -58,11 +58,33 @@ Even if the database is exposed, all passwords remain encrypted and unreadable w
 ✔ Breach Detection (offline check)  
 ✔ Password Reuse Detection  
 ✔ Categories (Social / Banking / Work / Other)  
-✔ Secure Clipboard Auto-Clear  
+✔ Secure Clipboard Auto-Clear (10 seconds)  
+✔ Dark / Light Theme Toggle (on every window)  
+✔ Password Masking (show / hide toggle)  
+✔ Live Strength & Entropy Indicator while typing  
+✔ Delete with Confirmation Dialog  
 
 ---
 
-## 📊 Password Entropy
+## � UI Overview
+
+### Login Window
+- Centered card layout — stays clean and centred at any window size
+- Dark / Light theme toggle pinned to the top-right corner
+- Enter key submits the password
+- Red border flash on wrong password
+
+### Main Vault Window
+- Two-column layout: **form panel** (fixed width, left) + **expanding vault table** (right)
+- Live strength & entropy indicator updates as you type a password
+- Passwords displayed as `••••••••` by default; **Show Passwords** button reveals them
+- **Copy Password** copies the selected entry and auto-clears clipboard after 10 seconds
+- **Delete Selected** requires confirmation before removing an entry
+- Dark / Light theme toggle in the top bar
+
+---
+
+
 Password entropy measures how random and secure a password is.
 
 - Low entropy → Weak password  
@@ -144,15 +166,16 @@ To update the breach list, replace or append entries to `breached.txt` (one pass
 
 | File | Purpose |
 |---|---|
-| `login.py` | Entry point — master password setup & login |
+| `login.py` | Entry point — master password setup & login window |
 | `auth.py` | PBKDF2 hashing and verification of master password |
-| `gui.py` | Main PyQt5 interface |
+| `gui.py` | Main PyQt5 vault interface (two-column layout, theme toggle) |
 | `database.py` | SQLite vault — encrypted CRUD operations |
 | `crypto.py` | AES-256-GCM encrypt/decrypt with PBKDF2 key derivation |
-| `generator.py` | Cryptographically secure password generation (`secrets`) |
+| `generator.py` | Cryptographically secure password generation (`secrets` module) |
 | `security.py` | Strength scoring and entropy calculation |
-| `entropy.py` | Standalone entropy utilities |
 | `breach.py` | Offline breach database checker |
-| `breached.txt` | Offline list of known leaked passwords |
+| `breached.txt` | Offline list of 50+ known leaked passwords |
+| `requirements.txt` | Python dependencies |
+| `pyrightconfig.json` | Pylance/Pyright config (suppresses PyQt5 import warnings) |
 
 ---
