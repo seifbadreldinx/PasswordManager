@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QInputDialog
 )
 
-from auth import get_master_password, set_master_password
+from auth import verify_master_password, set_master_password, is_setup
 
 
 class LoginWindow(QWidget):
@@ -29,9 +29,8 @@ class LoginWindow(QWidget):
         self.setLayout(layout)
 
     def login(self):
-        saved = get_master_password()
-
-        if saved is None:
+        if not is_setup():
+            # First run — prompt to create master password
             new_pass, ok = QInputDialog.getText(
                 self,
                 "Setup",
@@ -41,19 +40,23 @@ class LoginWindow(QWidget):
 
             if ok and new_pass:
                 set_master_password(new_pass)
-                saved = new_pass
-            else:
-                return
+                self._open_vault(new_pass)
 
-        if self.password.text() == saved:
-            from gui import PasswordManagerUI
+            return
 
-            self.win = PasswordManagerUI()
-            self.win.show()
-            self.close()
+        entered = self.password.text()
 
+        if verify_master_password(entered):
+            self._open_vault(entered)
         else:
             QMessageBox.warning(self, "Error", "Wrong Password ❌")
+
+    def _open_vault(self, master_password):
+        from gui import PasswordManagerUI
+
+        self.win = PasswordManagerUI(master_password)
+        self.win.show()
+        self.close()
 
 
 if __name__ == "__main__":

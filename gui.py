@@ -9,14 +9,17 @@ from PyQt5.QtWidgets import (
 )
 
 from generator import generate_password
-from database import create_table, insert_password, get_passwords, check_password_reuse
+from database import create_table, insert_password, get_passwords, delete_password, check_password_reuse
 from security import check_strength, calculate_entropy, entropy_level
 from breach import check_breach
 
 
 class PasswordManagerUI(QWidget):
-    def __init__(self):
+    def __init__(self, master_password):
         super().__init__()
+
+        self.master_password = master_password
+        self.current_data = []
 
         create_table()
 
@@ -125,7 +128,7 @@ class PasswordManagerUI(QWidget):
             QMessageBox.critical(self, "Breached", "Password leaked!")
             return
 
-        reused, sites = check_password_reuse(pwd)
+        reused, sites = check_password_reuse(pwd, self.master_password)
         if reused:
             QMessageBox.critical(
                 self,
@@ -134,7 +137,7 @@ class PasswordManagerUI(QWidget):
             )
             return
 
-        insert_password(site, user, pwd, cat)
+        insert_password(site, user, pwd, cat, self.master_password)
 
         QMessageBox.information(
             self,
@@ -152,10 +155,10 @@ class PasswordManagerUI(QWidget):
 
     # Show passwords
     def show_data(self):
-        data = get_passwords()
-        self.table.setRowCount(len(data))
+        self.current_data = get_passwords(self.master_password)
+        self.table.setRowCount(len(self.current_data))
 
-        for i, row in enumerate(data):
+        for i, row in enumerate(self.current_data):
             self.table.setItem(i, 0, QTableWidgetItem(row[1]))
             self.table.setItem(i, 1, QTableWidgetItem(row[2]))
             self.table.setItem(i, 2, QTableWidgetItem(row[3]))

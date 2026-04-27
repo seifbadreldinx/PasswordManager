@@ -1,8 +1,6 @@
 import sqlite3
 from crypto import encrypt_text, decrypt_text
 
-MASTER_PASSWORD = "master123"
-
 
 def connect():
     return sqlite3.connect("vault.db")
@@ -26,11 +24,11 @@ def create_table():
     conn.close()
 
 
-def insert_password(site, username, password, category):
+def insert_password(site, username, password, category, master_password):
     conn = connect()
     cur = conn.cursor()
 
-    encrypted = encrypt_text(MASTER_PASSWORD, password)
+    encrypted = encrypt_text(master_password, password)
 
     cur.execute("""
         INSERT INTO passwords (site, username, password, category)
@@ -41,7 +39,7 @@ def insert_password(site, username, password, category):
     conn.close()
 
 
-def get_passwords():
+def get_passwords(master_password):
     conn = connect()
     cur = conn.cursor()
 
@@ -57,14 +55,22 @@ def get_passwords():
             row[0],
             row[1],
             row[2],
-            decrypt_text(MASTER_PASSWORD, row[3]),
+            decrypt_text(master_password, row[3]),
             row[4]
         ))
 
     return data
 
 
-def check_password_reuse(password):
+def delete_password(entry_id):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM passwords WHERE id = ?", (entry_id,))
+    conn.commit()
+    conn.close()
+
+
+def check_password_reuse(password, master_password):
     conn = connect()
     cur = conn.cursor()
 
@@ -77,7 +83,7 @@ def check_password_reuse(password):
 
     for site, enc_password in rows:
         try:
-            if decrypt_text(MASTER_PASSWORD, enc_password) == password:
+            if decrypt_text(master_password, enc_password) == password:
                 sites.append(site)
         except:
             pass
