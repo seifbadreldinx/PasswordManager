@@ -1,0 +1,20 @@
+# Database (user data - never commit)
+vault.db
+
+# Master password hash (user-specific - never commit)
+auth.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+env/
+
+# IDE
+.vscode/
+.idea/
