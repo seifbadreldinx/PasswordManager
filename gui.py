@@ -84,6 +84,10 @@ class PasswordManagerUI(QWidget):
         btn3.clicked.connect(self.show_data)
         layout.addWidget(btn3)
 
+        btn4 = QPushButton("Delete Selected")
+        btn4.clicked.connect(self.delete_selected)
+        layout.addWidget(btn4)
+
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(
@@ -152,6 +156,28 @@ class PasswordManagerUI(QWidget):
         self.password.clear()
 
         self.show_data()
+
+    # Delete selected password
+    def delete_selected(self):
+        selected = self.table.currentRow()
+
+        if selected < 0:
+            QMessageBox.warning(self, "Warning", "Select a row to delete")
+            return
+
+        entry_id = self.current_data[selected][0]
+        site = self.current_data[selected][1]
+
+        confirm = QMessageBox.question(
+            self,
+            "Confirm Delete",
+            f"Delete password for '{site}'?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        if confirm == QMessageBox.Yes:
+            delete_password(entry_id)
+            self.show_data()
 
     # Show passwords
     def show_data(self):
