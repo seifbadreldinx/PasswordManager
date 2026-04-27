@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 
 
@@ -20,21 +20,29 @@ def generate_password(length=12, strength="strong"):
 
     # 🔐 ensure complexity rules
     if strength == "strong":
-        password.append(random.choice(symbols))
-        password.append(random.choice(digits))
-        password.append(random.choice(letters))
+        password.append(secrets.choice(symbols))
+        password.append(secrets.choice(digits))
+        password.append(secrets.choice(letters))
 
         # fill remaining length
-        password += [random.choice(chars) for _ in range(length - 3)]
+        password += [secrets.choice(chars) for _ in range(length - 3)]
 
-        random.shuffle(password)
+        # cryptographically secure shuffle (Fisher-Yates)
+        for i in range(len(password) - 1, 0, -1):
+            j = secrets.randbelow(i + 1)
+            password[i], password[j] = password[j], password[i]
+
         return ''.join(password)
 
     elif strength == "medium":
-        password.append(random.choice(digits))
-        password += [random.choice(chars) for _ in range(length - 1)]
-        random.shuffle(password)
+        password.append(secrets.choice(digits))
+        password += [secrets.choice(chars) for _ in range(length - 1)]
+
+        for i in range(len(password) - 1, 0, -1):
+            j = secrets.randbelow(i + 1)
+            password[i], password[j] = password[j], password[i]
+
         return ''.join(password)
 
     else:
-        return ''.join(random.choice(chars) for _ in range(length))
+        return ''.join(secrets.choice(chars) for _ in range(length))
