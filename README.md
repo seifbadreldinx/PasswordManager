@@ -85,9 +85,74 @@ Higher entropy means better protection against attacks.
 
 ## ▶ How to Run
 
-### 1. Install requirements:
-```bash
-pip install pyqt5 pycryptodome pyperclip"
+### Prerequisites
+- Python 3.8 or higher
 
-2. Run the application:
+### 1. Clone the repository
+```bash
+git clone https://github.com/seifbadreldinx/PasswordManager.git
+cd PasswordManager
+```
+
+### 2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Launch the application
+```bash
 python login.py
+```
+
+---
+
+## 📖 Usage Guide
+
+### First Launch — Create a Master Password
+On the first run, a setup dialog will appear asking you to create a master password.  
+This password is hashed with PBKDF2 (150,000 iterations) and **never stored in plaintext**.  
+> ⚠ If you forget your master password, your vault cannot be recovered.
+
+### Saving a Password
+1. Enter the **Site**, **Username**, and **Password** fields
+2. Select a **Category** (Social, Banking, Work, Other)
+3. Choose **Strength** and **Length** for generation (optional)
+4. Click **Save Password**
+
+The app will:
+- Check if the password has appeared in breach databases
+- Warn if you are reusing a password across sites
+- Display the entropy score and strength rating
+
+### Generating a Password
+1. Set desired **Length** (6–32 characters) and **Strength** level
+2. Click **Generate Password** — the password fills the field and copies to clipboard
+3. Clipboard is automatically cleared after **10 seconds**
+
+### Deleting a Password
+1. Click any row in the password table to select it
+2. Click **Delete Selected**
+3. Confirm the deletion in the dialog
+
+### Breach Detection
+The app checks passwords against `breached.txt` — an offline list of known leaked passwords.  
+To update the breach list, replace or append entries to `breached.txt` (one password per line).
+
+---
+
+## 📁 Project Structure
+
+| File | Purpose |
+|---|---|
+| `login.py` | Entry point — master password setup & login |
+| `auth.py` | PBKDF2 hashing and verification of master password |
+| `gui.py` | Main PyQt5 interface |
+| `database.py` | SQLite vault — encrypted CRUD operations |
+| `crypto.py` | AES-256-GCM encrypt/decrypt with PBKDF2 key derivation |
+| `generator.py` | Cryptographically secure password generation (`secrets`) |
+| `security.py` | Strength scoring and entropy calculation |
+| `entropy.py` | Standalone entropy utilities |
+| `breach.py` | Offline breach database checker |
+| `breached.txt` | Offline list of known leaked passwords |
+
+---
