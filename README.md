@@ -131,9 +131,10 @@ python login.py
 ## 📖 Usage Guide
 
 ### First Launch — Create a Master Password
-On the first run, clicking **Login** opens a styled **Create Vault** dialog (matching the app theme).  
+On the first run, a styled **Create Vault** dialog appears immediately (before the login window).  
 Enter your new master password in both fields — they must match before the vault is created.  
 This password is hashed with PBKDF2 (150,000 iterations) and **never stored in plaintext**.  
+After creation, the **login window** appears — enter your new password to unlock the vault.  
 > ⚠ If you forget your master password, your vault cannot be recovered.
 
 ### Saving a Password
