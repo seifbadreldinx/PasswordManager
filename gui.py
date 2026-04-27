@@ -42,7 +42,12 @@ class PasswordManagerUI(QWidget):
 
         self.password = QLineEdit()
         self.password.setPlaceholderText("Password")
+        self.password.textChanged.connect(self._update_strength_indicator)
         layout.addWidget(self.password)
+
+        self.strength_label = QLabel("Strength: —")
+        self.strength_label.setStyleSheet("color: gray; font-weight: bold;")
+        layout.addWidget(self.strength_label)
 
         row1 = QHBoxLayout()
         row1.addWidget(QLabel("Strength:"))
@@ -98,6 +103,25 @@ class PasswordManagerUI(QWidget):
         layout.addWidget(self.table)
 
         self.setLayout(layout)
+
+    # Live strength indicator
+    def _update_strength_indicator(self, text):
+        if not text:
+            self.strength_label.setText("Strength: —")
+            self.strength_label.setStyleSheet("color: gray; font-weight: bold;")
+            return
+
+        strength, _ = check_strength(text)
+        entropy = calculate_entropy(text)
+        level = entropy_level(entropy)
+
+        colors = {"Weak": "#e74c3c", "Medium": "#e67e22", "Strong": "#27ae60"}
+        color = colors.get(level, "gray")
+
+        self.strength_label.setText(
+            f"Strength: {strength}  |  Entropy: {entropy} bits  |  Level: {level}"
+        )
+        self.strength_label.setStyleSheet(f"color: {color}; font-weight: bold;")
 
     # Generate password
     def generate(self):
