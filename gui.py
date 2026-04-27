@@ -361,7 +361,8 @@ class PasswordManagerUI(QWidget):
 
 
 if __name__ == "__main__":
+    from login import LoginWindow
     app = QApplication(sys.argv)
-    win = PasswordManagerUI()
+    win = LoginWindow()
     win.show()
     sys.exit(app.exec_())
