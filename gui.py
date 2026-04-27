@@ -25,10 +25,69 @@ class PasswordManagerUI(QWidget):
         create_table()
 
         self.setWindowTitle("Secure Password Manager 🔐")
-        self.setGeometry(250, 100, 800, 600)
+        self.setGeometry(250, 100, 860, 680)
+        self._apply_style()
 
         self.ui()
         self.show_data()
+
+    def _apply_style(self):
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #1e1e2e;
+                color: #cdd6f4;
+                font-family: Segoe UI, Arial, sans-serif;
+                font-size: 13px;
+            }
+            QLineEdit, QComboBox, QSpinBox {
+                background-color: #313244;
+                border: 1px solid #45475a;
+                border-radius: 6px;
+                padding: 6px 10px;
+                color: #cdd6f4;
+            }
+            QLineEdit:focus, QComboBox:focus, QSpinBox:focus {
+                border: 1px solid #89b4fa;
+            }
+            QPushButton {
+                background-color: #89b4fa;
+                color: #1e1e2e;
+                border: none;
+                border-radius: 6px;
+                padding: 7px 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #b4befe;
+            }
+            QPushButton:pressed {
+                background-color: #74c7ec;
+            }
+            QPushButton:checked {
+                background-color: #a6e3a1;
+                color: #1e1e2e;
+            }
+            QTableWidget {
+                background-color: #313244;
+                gridline-color: #45475a;
+                border: none;
+                border-radius: 6px;
+            }
+            QHeaderView::section {
+                background-color: #45475a;
+                color: #cdd6f4;
+                padding: 6px;
+                border: none;
+                font-weight: bold;
+            }
+            QTableWidget::item:selected {
+                background-color: #89b4fa;
+                color: #1e1e2e;
+            }
+            QLabel {
+                color: #cdd6f4;
+            }
+        """)
 
     def ui(self):
         layout = QVBoxLayout()

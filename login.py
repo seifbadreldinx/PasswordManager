@@ -13,7 +13,17 @@ class LoginWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("Login 🔐")
-        self.setGeometry(300, 300, 300, 150)
+        self.setGeometry(300, 300, 320, 170)
+        self.setStyleSheet("""
+            QWidget { background-color: #1e1e2e; color: #cdd6f4;
+                      font-family: Segoe UI, Arial, sans-serif; font-size: 13px; }
+            QLineEdit { background-color: #313244; border: 1px solid #45475a;
+                        border-radius: 6px; padding: 6px 10px; color: #cdd6f4; }
+            QLineEdit:focus { border: 1px solid #89b4fa; }
+            QPushButton { background-color: #89b4fa; color: #1e1e2e; border: none;
+                          border-radius: 6px; padding: 7px 14px; font-weight: bold; }
+            QPushButton:hover { background-color: #b4befe; }
+        """)
 
         layout = QVBoxLayout()
 
