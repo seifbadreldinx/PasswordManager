@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QLineEdit,
     QPushButton, QVBoxLayout, QHBoxLayout,
-    QMessageBox, QInputDialog, QLabel, QFrame
+    QMessageBox, QLabel, QFrame, QDialog
 )
 
 from auth import verify_master_password, set_master_password, is_setup
@@ -48,6 +48,71 @@ LIGHT = """
                            border-radius: 6px; padding: 5px 10px; font-size: 12px; }
     QPushButton#themeBtn:hover { background-color: #bcc0cc; }
 """
+
+
+class SetupDialog(QDialog):
+    """Styled first-run dialog that inherits the app theme."""
+
+    def __init__(self, stylesheet, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("First Time Setup")
+        self.setFixedWidth(360)
+        self.setWindowFlags(Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        self.setStyleSheet(stylesheet)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(28, 28, 28, 28)
+        layout.setSpacing(14)
+
+        title = QLabel("🔑  Create Master Password")
+        title.setObjectName("title")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+
+        sub = QLabel("This password encrypts your entire vault.\nIt cannot be recovered if forgotten.")
+        sub.setObjectName("subtitle")
+        sub.setAlignment(Qt.AlignCenter)
+        sub.setWordWrap(True)
+        layout.addWidget(sub)
+
+        layout.addSpacing(4)
+
+        self.field = QLineEdit()
+        self.field.setPlaceholderText("New Master Password")
+        self.field.setEchoMode(QLineEdit.Password)
+        self.field.returnPressed.connect(self._confirm)
+        layout.addWidget(self.field)
+
+        self.confirm = QLineEdit()
+        self.confirm.setPlaceholderText("Confirm Master Password")
+        self.confirm.setEchoMode(QLineEdit.Password)
+        self.confirm.returnPressed.connect(self._confirm)
+        layout.addWidget(self.confirm)
+
+        self.error_lbl = QLabel("")
+        self.error_lbl.setStyleSheet("color: #f38ba8; font-size: 12px;")
+        self.error_lbl.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.error_lbl)
+
+        btn = QPushButton("Create Vault")
+        btn.setObjectName("loginBtn")
+        btn.clicked.connect(self._confirm)
+        layout.addWidget(btn)
+
+        self.result_password = None
+
+    def _confirm(self):
+        p1 = self.field.text()
+        p2 = self.confirm.text()
+        if not p1:
+            self.error_lbl.setText("Password cannot be empty.")
+            return
+        if p1 != p2:
+            self.error_lbl.setText("Passwords do not match.")
+            self.confirm.clear()
+            return
+        self.result_password = p1
+        self.accept()
 
 
 class LoginWindow(QWidget):
@@ -125,17 +190,10 @@ class LoginWindow(QWidget):
 
     def login(self):
         if not is_setup():
-            new_pass, ok = QInputDialog.getText(
-                self,
-                "First Time Setup",
-                "Create a Master Password:",
-                QLineEdit.Password
-            )
-
-            if ok and new_pass:
-                set_master_password(new_pass)
-                self._open_vault(new_pass)
-
+            dlg = SetupDialog(DARK if self.is_dark else LIGHT, parent=self)
+            if dlg.exec_() == QDialog.Accepted and dlg.result_password:
+                set_master_password(dlg.result_password)
+                self._open_vault(dlg.result_password)
             return
 
         entered = self.password.text()
