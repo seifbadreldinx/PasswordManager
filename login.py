@@ -183,19 +183,26 @@ class LoginWindow(QWidget):
 
         outer.addStretch()
 
+        # If no master password exists yet, show setup dialog immediately
+        if not is_setup():
+            from PyQt5.QtCore import QTimer
+            QTimer.singleShot(0, self._run_setup)
+
+    def _run_setup(self):
+        dlg = SetupDialog(DARK if self.is_dark else LIGHT, parent=self)
+        if dlg.exec_() == QDialog.Accepted and dlg.result_password:
+            set_master_password(dlg.result_password)
+            self._open_vault(dlg.result_password)
+        else:
+            # User cancelled — close the app
+            self.close()
+
     def _toggle_theme(self):
         self.is_dark = not self.is_dark
         self.setStyleSheet(DARK if self.is_dark else LIGHT)
         self.theme_btn.setText("☀  Light Mode" if self.is_dark else "🌙  Dark Mode")
 
     def login(self):
-        if not is_setup():
-            dlg = SetupDialog(DARK if self.is_dark else LIGHT, parent=self)
-            if dlg.exec_() == QDialog.Accepted and dlg.result_password:
-                set_master_password(dlg.result_password)
-                self._open_vault(dlg.result_password)
-            return
-
         entered = self.password.text()
 
         if verify_master_password(entered):
