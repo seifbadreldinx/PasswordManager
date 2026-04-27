@@ -1,11 +1,12 @@
 import sys
 import pyperclip
 
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QPushButton, QLabel, QComboBox, QSpinBox,
-    QTableWidget, QTableWidgetItem, QMessageBox, QHeaderView
+    QTableWidget, QTableWidgetItem, QMessageBox, QHeaderView,
+    QFrame, QSizePolicy
 )
 
 from generator import generate_password
@@ -74,102 +75,141 @@ class PasswordManagerUI(QWidget):
         self.setStyleSheet(self.DARK_STYLE if self.is_dark_mode else self.LIGHT_STYLE)
 
     def ui(self):
-        layout = QVBoxLayout()
+        # Root layout
+        root = QVBoxLayout(self)
+        root.setContentsMargins(20, 16, 20, 16)
+        root.setSpacing(12)
 
-        # Theme toggle pinned to top-right
-        top_row = QHBoxLayout()
-        top_row.addStretch()
+        # ── Top bar ──────────────────────────────────────────
+        top_bar = QHBoxLayout()
+        title_lbl = QLabel("🔐  Secure Password Manager")
+        title_lbl.setStyleSheet("font-size: 16px; font-weight: bold;")
+        top_bar.addWidget(title_lbl)
+        top_bar.addStretch()
         self.theme_btn = QPushButton("☀  Light Mode")
         self.theme_btn.setCheckable(True)
         self.theme_btn.setFixedWidth(140)
         self.theme_btn.toggled.connect(self._toggle_theme)
-        top_row.addWidget(self.theme_btn)
-        layout.addLayout(top_row)
+        top_bar.addWidget(self.theme_btn)
+        root.addLayout(top_bar)
+
+        # Divider
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setStyleSheet("color: #45475a;")
+        root.addWidget(line)
+
+        # ── Two-column body ───────────────────────────────────
+        body = QHBoxLayout()
+        body.setSpacing(20)
+
+        # ── LEFT PANEL: form ──────────────────────────────────
+        left = QVBoxLayout()
+        left.setSpacing(10)
+
+        form_label = QLabel("Add New Password")
+        form_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        left.addWidget(form_label)
 
         self.site = QLineEdit()
-        self.site.setPlaceholderText("Site")
-        layout.addWidget(self.site)
+        self.site.setPlaceholderText("Site  (e.g. github.com)")
+        left.addWidget(self.site)
 
         self.user = QLineEdit()
-        self.user.setPlaceholderText("Username")
-        layout.addWidget(self.user)
+        self.user.setPlaceholderText("Username / Email")
+        left.addWidget(self.user)
 
         self.password = QLineEdit()
         self.password.setPlaceholderText("Password")
         self.password.textChanged.connect(self._update_strength_indicator)
-        layout.addWidget(self.password)
+        left.addWidget(self.password)
 
         self.strength_label = QLabel("Strength: —")
-        self.strength_label.setStyleSheet("color: gray; font-weight: bold;")
-        layout.addWidget(self.strength_label)
+        self.strength_label.setStyleSheet("color: gray; font-weight: bold; font-size: 12px;")
+        left.addWidget(self.strength_label)
 
-        row1 = QHBoxLayout()
-        row1.addWidget(QLabel("Strength:"))
-
+        # Row: Strength + Length
+        opts_row = QHBoxLayout()
+        opts_row.addWidget(QLabel("Strength:"))
         self.strength = QComboBox()
         self.strength.addItems(["weak", "medium", "strong"])
-        row1.addWidget(self.strength)
-
-        layout.addLayout(row1)
-
-        row2 = QHBoxLayout()
-        row2.addWidget(QLabel("Length:"))
-
+        self.strength.setCurrentIndex(2)
+        opts_row.addWidget(self.strength)
+        opts_row.addSpacing(12)
+        opts_row.addWidget(QLabel("Length:"))
         self.length = QSpinBox()
         self.length.setRange(6, 32)
         self.length.setValue(12)
-        row2.addWidget(self.length)
+        opts_row.addWidget(self.length)
+        left.addLayout(opts_row)
 
-        layout.addLayout(row2)
-
-        row3 = QHBoxLayout()
-        row3.addWidget(QLabel("Category:"))
-
+        # Row: Category
+        cat_row = QHBoxLayout()
+        cat_row.addWidget(QLabel("Category:"))
         self.category = QComboBox()
         self.category.addItems(["Social", "Banking", "Work", "Other"])
-        row3.addWidget(self.category)
+        cat_row.addWidget(self.category)
+        left.addLayout(cat_row)
 
-        layout.addLayout(row3)
+        btn_gen = QPushButton("⚡  Generate Password")
+        btn_gen.clicked.connect(self.generate)
+        left.addWidget(btn_gen)
 
-        btn1 = QPushButton("Generate Password")
-        btn1.clicked.connect(self.generate)
-        layout.addWidget(btn1)
+        btn_save = QPushButton("💾  Save Password")
+        btn_save.clicked.connect(self.save)
+        left.addWidget(btn_save)
 
-        btn2 = QPushButton("Save Password")
-        btn2.clicked.connect(self.save)
-        layout.addWidget(btn2)
+        left.addStretch()
 
-        btn3 = QPushButton("Refresh Vault")
-        btn3.clicked.connect(self.show_data)
-        layout.addWidget(btn3)
+        # Wrap left panel in a fixed-width frame
+        left_frame = QFrame()
+        left_frame.setFixedWidth(300)
+        left_frame.setLayout(left)
+        body.addWidget(left_frame)
 
-        btn_row = QHBoxLayout()
+        # ── RIGHT PANEL: vault table ──────────────────────────
+        right = QVBoxLayout()
+        right.setSpacing(8)
 
-        btn4 = QPushButton("Delete Selected")
-        btn4.clicked.connect(self.delete_selected)
-        btn_row.addWidget(btn4)
-
-        btn5 = QPushButton("Copy Password")
-        btn5.clicked.connect(self.copy_selected_password)
-        btn_row.addWidget(btn5)
-
-        self.reveal_btn = QPushButton("Show Passwords")
-        self.reveal_btn.setCheckable(True)
-        self.reveal_btn.toggled.connect(self._toggle_reveal)
-        btn_row.addWidget(self.reveal_btn)
-
-        layout.addLayout(btn_row)
+        vault_label = QLabel("Password Vault")
+        vault_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        right.addWidget(vault_label)
 
         self.table = QTableWidget()
         self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(
-            ["Site", "Username", "Password", "Category"]
-        )
+        self.table.setHorizontalHeaderLabels(["Site", "Username", "Password", "Category"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        right.addWidget(self.table)
 
-        layout.addWidget(self.table)
+        # Vault action buttons
+        vault_btns = QHBoxLayout()
+        vault_btns.setSpacing(8)
 
-        self.setLayout(layout)
+        self.reveal_btn = QPushButton("👁  Show Passwords")
+        self.reveal_btn.setCheckable(True)
+        self.reveal_btn.toggled.connect(self._toggle_reveal)
+        vault_btns.addWidget(self.reveal_btn)
+
+        btn_copy = QPushButton("📋  Copy Password")
+        btn_copy.clicked.connect(self.copy_selected_password)
+        vault_btns.addWidget(btn_copy)
+
+        btn_del = QPushButton("🗑  Delete Selected")
+        btn_del.clicked.connect(self.delete_selected)
+        vault_btns.addWidget(btn_del)
+
+        btn_refresh = QPushButton("↻  Refresh")
+        btn_refresh.clicked.connect(self.show_data)
+        vault_btns.addWidget(btn_refresh)
+
+        right.addLayout(vault_btns)
+        body.addLayout(right)
+
+        root.addLayout(body)
 
     # Toggle dark / light theme
     def _toggle_theme(self, checked):
