@@ -77,6 +77,7 @@ Even if the database is exposed, all passwords remain encrypted and unreadable w
 ### Main Vault Window
 - Two-column layout: **form panel** (fixed width, left) + **expanding vault table** (right)
 - Live strength & entropy indicator updates as you type a password
+- **Search bar** filters vault entries in real time by site or username
 - Passwords displayed as `••••••••` by default; **Show Passwords** button reveals them
 - **Copy Password** copies the selected entry and auto-clears clipboard after 10 seconds
 - **Delete Selected** requires confirmation before removing an entry
@@ -169,7 +170,9 @@ To update the breach list, append SHA-1 hashes (one per line) to `breached.txt`.
 
 | File | Purpose |
 |---|---|
-| `login.py` | Entry point — master password setup & login window |
+| `main.py` | Application entry point — launches setup dialog then login window |
+| `login.py` | Master password setup dialog & login window |
+
 | `auth.py` | PBKDF2 hashing and verification of master password |
 | `gui.py` | Main PyQt5 vault interface (two-column layout, theme toggle) |
 | `database.py` | SQLite vault — encrypted CRUD operations |
