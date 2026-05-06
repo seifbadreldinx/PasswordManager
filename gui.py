@@ -126,6 +126,7 @@ class PasswordManagerUI(QWidget):
 
         self.strength_label = QLabel("Strength: —")
         self.strength_label.setStyleSheet("color: gray; font-weight: bold; font-size: 12px;")
+        self.strength_label.setWordWrap(True)
         left.addWidget(self.strength_label)
 
         # Row: Strength + Length
@@ -252,10 +253,8 @@ class PasswordManagerUI(QWidget):
 
         self.password.setText(pwd)
 
-        clipboard = QApplication.clipboard()
-        clipboard.setText(pwd)
-
-        QTimer.singleShot(10000, lambda: clipboard.clear())
+        QApplication.clipboard().setText(pwd)
+        QTimer.singleShot(10000, lambda: QApplication.clipboard().setText(""))
 
     # Save password
     def save(self):
@@ -314,9 +313,8 @@ class PasswordManagerUI(QWidget):
             QMessageBox.warning(self, "Error", "Could not decrypt password")
             return
 
-        clipboard = QApplication.clipboard()
-        clipboard.setText(pwd)
-        QTimer.singleShot(10000, lambda: clipboard.clear())
+        QApplication.clipboard().setText(pwd)
+        QTimer.singleShot(10000, lambda: QApplication.clipboard().setText(""))
         QMessageBox.information(self, "Copied", "Password copied. Clipboard clears in 10 seconds.")
 
     # Toggle password visibility in table
