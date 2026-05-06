@@ -1,4 +1,5 @@
 import sys
+import ctypes
 import pyperclip
 
 from PyQt5.QtCore import QTimer, Qt
@@ -244,6 +245,15 @@ class PasswordManagerUI(QWidget):
         )
         self.strength_label.setStyleSheet(f"color: {color}; font-weight: bold;")
 
+    def _clear_clipboard(self):
+        """Empty the clipboard using the Win32 API so no blank entry is added to clipboard history."""
+        try:
+            if ctypes.windll.user32.OpenClipboard(None):
+                ctypes.windll.user32.EmptyClipboard()
+                ctypes.windll.user32.CloseClipboard()
+        except Exception:
+            QApplication.clipboard().setText("")
+
     # Generate password
     def generate(self):
         pwd = generate_password(
@@ -254,7 +264,7 @@ class PasswordManagerUI(QWidget):
         self.password.setText(pwd)
 
         QApplication.clipboard().setText(pwd)
-        QTimer.singleShot(10000, lambda: QApplication.clipboard().setText(""))
+        QTimer.singleShot(10000, self._clear_clipboard)
 
     # Save password
     def save(self):
@@ -314,7 +324,7 @@ class PasswordManagerUI(QWidget):
             return
 
         QApplication.clipboard().setText(pwd)
-        QTimer.singleShot(10000, lambda: QApplication.clipboard().setText(""))
+        QTimer.singleShot(10000, self._clear_clipboard)
         QMessageBox.information(self, "Copied", "Password copied. Clipboard clears in 10 seconds.")
 
     # Toggle password visibility in table
@@ -374,7 +384,7 @@ class PasswordManagerUI(QWidget):
 
     # Clear clipboard on close
     def closeEvent(self, event):
-        pyperclip.copy("")
+        self._clear_clipboard()
         event.accept()
 
 
