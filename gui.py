@@ -86,6 +86,13 @@ class PasswordManagerUI(QWidget):
         title_lbl = QLabel("🔐  Secure Password Manager")
         title_lbl.setStyleSheet("font-size: 16px; font-weight: bold;")
         top_bar.addWidget(title_lbl)
+
+        local_badge = QLabel("🖥 Local Only — Never Synced")
+        local_badge.setStyleSheet(
+            "color: #a6e3a1; font-size: 11px; font-weight: bold; "
+            "background-color: #1e3a2e; border-radius: 4px; padding: 3px 8px;"
+        )
+        top_bar.addWidget(local_badge)
         top_bar.addStretch()
         self.theme_btn = QPushButton("☀  Light Mode")
         self.theme_btn.setCheckable(True)
