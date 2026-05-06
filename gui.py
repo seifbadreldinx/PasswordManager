@@ -233,6 +233,12 @@ class PasswordManagerUI(QWidget):
             self.strength_label.setStyleSheet("color: gray; font-weight: bold;")
             return
 
+        # Breach check takes priority
+        if check_breach(text):
+            self.strength_label.setText("⚠ BREACHED — This password was found in a data leak!")
+            self.strength_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+            return
+
         strength, _ = check_strength(text)
         entropy = calculate_entropy(text)
         level = entropy_level(entropy)
