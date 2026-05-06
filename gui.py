@@ -246,13 +246,36 @@ class PasswordManagerUI(QWidget):
         self.strength_label.setStyleSheet(f"color: {color}; font-weight: bold;")
 
     def _clear_clipboard(self):
-        """Empty the clipboard using the Win32 API so no blank entry is added to clipboard history."""
+        """
+        Clear the current clipboard AND Windows Clipboard History.
+        Uses Win32 EmptyClipboard for the active clipboard and the WinRT
+        Clipboard.ClearHistory() API (via PowerShell) for the history.
+        """
+        # 1. Clear active clipboard
         try:
             if ctypes.windll.user32.OpenClipboard(None):
                 ctypes.windll.user32.EmptyClipboard()
                 ctypes.windll.user32.CloseClipboard()
         except Exception:
             QApplication.clipboard().setText("")
+
+        # 2. Clear Windows Clipboard History (Win+V) via WinRT API
+        try:
+            import subprocess
+            subprocess.Popen(
+                [
+                    "powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command",
+                    "[Windows.ApplicationModel.DataTransfer.Clipboard,"
+                    "Windows.ApplicationModel.DataTransfer,ContentType=WindowsRuntime]"
+                    " | Out-Null; "
+                    "[Windows.ApplicationModel.DataTransfer.Clipboard]::ClearHistory() | Out-Null"
+                ],
+                creationflags=0x08000000,  # CREATE_NO_WINDOW
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            pass
 
     # Generate password
     def generate(self):
