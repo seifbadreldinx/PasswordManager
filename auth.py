@@ -1,6 +1,7 @@
 import json
 import os
 import base64
+import hmac
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Random import get_random_bytes
 from Crypto.Hash import SHA256
@@ -21,7 +22,7 @@ def set_master_password(password):
 
 
 def verify_master_password(password):
-    """Verify a password against the stored PBKDF2 hash."""
+    """Verify a password against the stored PBKDF2 hash using constant-time comparison."""
     if not os.path.exists(FILE):
         return False
     with open(FILE, "r") as f:
@@ -29,7 +30,7 @@ def verify_master_password(password):
     salt = base64.b64decode(data["salt"])
     stored_hash = base64.b64decode(data["hash"])
     derived = PBKDF2(password, salt, dkLen=32, count=150000, hmac_hash_module=SHA256)
-    return derived == stored_hash
+    return hmac.compare_digest(derived, stored_hash)
 
 
 def is_setup():

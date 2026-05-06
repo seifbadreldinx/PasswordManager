@@ -2,8 +2,18 @@ import math
 import string
 
 common_passwords = [
-    "123456", "password", "123456789",
-    "admin", "12345678", "abc123"
+    "123456", "password", "123456789", "12345678", "12345",
+    "1234567", "1234567890", "qwerty", "abc123", "111111",
+    "000000", "121212", "123123", "654321", "666666",
+    "admin", "admin123", "root", "toor", "login",
+    "welcome", "letmein", "trustno1", "changeme", "secret",
+    "pass", "pass123", "pass1234", "mypassword",
+    "qwerty123", "qwerty1", "1qaz2wsx", "1q2w3e4r",
+    "password1", "password123", "password1234",
+    "monkey", "dragon", "master", "shadow", "iloveyou",
+    "sunshine", "princess", "superman", "batman", "starwars",
+    "football", "baseball", "soccer", "hello", "hello123",
+    "test", "test123", "guest", "access",
 ]
 
 

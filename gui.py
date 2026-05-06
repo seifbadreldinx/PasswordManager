@@ -175,6 +175,11 @@ class PasswordManagerUI(QWidget):
         vault_label.setStyleSheet("font-size: 14px; font-weight: bold;")
         right.addWidget(vault_label)
 
+        self.search_box = QLineEdit()
+        self.search_box.setPlaceholderText("Search by site or username...")
+        self.search_box.textChanged.connect(self._filter_table)
+        right.addWidget(self.search_box)
+
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Site", "Username", "Password", "Category"])
@@ -353,6 +358,21 @@ class PasswordManagerUI(QWidget):
             self.table.setItem(i, 1, QTableWidgetItem(row[2]))
             self.table.setItem(i, 2, QTableWidgetItem(pwd_display))
             self.table.setItem(i, 3, QTableWidgetItem(row[4]))
+
+        self._filter_table(self.search_box.text() if hasattr(self, 'search_box') else "")
+
+    # Live search / filter
+    def _filter_table(self, query):
+        query = query.strip().lower()
+        for i in range(self.table.rowCount()):
+            site = self.table.item(i, 0)
+            user = self.table.item(i, 1)
+            visible = (
+                not query
+                or (site and query in site.text().lower())
+                or (user and query in user.text().lower())
+            )
+            self.table.setRowHidden(i, not visible)
 
     # Clear clipboard on close
     def closeEvent(self, event):

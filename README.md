@@ -55,7 +55,7 @@ Even if the database is exposed, all passwords remain encrypted and unreadable w
 ✔ Password Generator (weak / medium / strong)  
 ✔ Password Strength Checker  
 ✔ Password Entropy Analysis  
-✔ Breach Detection (offline check)  
+✔ Breach Detection (offline SHA-1 hash database, HIBP format)  
 ✔ Password Reuse Detection  
 ✔ Categories (Social / Banking / Work / Other)  
 ✔ Secure Clipboard Auto-Clear (10 seconds)  
@@ -123,7 +123,7 @@ pip install -r requirements.txt
 
 ### 3. Launch the application
 ```bash
-python login.py
+python main.py
 ```
 
 ---
@@ -159,8 +159,9 @@ The app will:
 3. Confirm the deletion in the dialog
 
 ### Breach Detection
-The app checks passwords against `breached.txt` — an offline list of known leaked passwords.  
-To update the breach list, replace or append entries to `breached.txt` (one password per line).
+The app checks passwords against `breached.txt` — an offline breach database in **HIBP SHA-1 hash format**.  
+Passwords are never stored in plaintext; the input is SHA-1 hashed and compared against the hash list.  
+To update the breach list, append SHA-1 hashes (one per line) to `breached.txt`.
 
 ---
 
@@ -175,8 +176,8 @@ To update the breach list, replace or append entries to `breached.txt` (one pass
 | `crypto.py` | AES-256-GCM encrypt/decrypt with PBKDF2 key derivation |
 | `generator.py` | Cryptographically secure password generation (`secrets` module) |
 | `security.py` | Strength scoring and entropy calculation |
-| `breach.py` | Offline breach database checker |
-| `breached.txt` | Offline list of 50+ known leaked passwords |
+| `breach.py` | Offline breach checker — SHA-1 hashes passwords before lookup |
+| `breached.txt` | 220+ SHA-1 hashes of known leaked passwords (HIBP format) |
 | `requirements.txt` | Python dependencies |
 | `pyrightconfig.json` | Pylance/Pyright config (suppresses PyQt5 import warnings) |
 
