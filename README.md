@@ -55,14 +55,17 @@ Even if the database is exposed, all passwords remain encrypted and unreadable w
 ✔ Password Generator (weak / medium / strong)  
 ✔ Password Strength Checker  
 ✔ Password Entropy Analysis  
-✔ Breach Detection (offline SHA-1 hash database, HIBP format)  
+✔ Live Breach Notification while typing (HIBP SHA-1 format)  
+✔ Breach Detection blocked on Save  
 ✔ Password Reuse Detection  
 ✔ Categories (Social / Banking / Work / Other)  
-✔ Secure Clipboard Auto-Clear (10 seconds)  
+✔ Secure Clipboard Auto-Clear (10 seconds — active clipboard + Windows History)  
 ✔ Dark / Light Theme Toggle (on every window)  
 ✔ Password Masking (show / hide toggle)  
 ✔ Live Strength & Entropy Indicator while typing  
+✔ Live Search / Filter vault by site or username  
 ✔ Delete with Confirmation Dialog  
+✔ Local Only — Never Synced badge  
 
 ---
 
@@ -172,7 +175,6 @@ To update the breach list, append SHA-1 hashes (one per line) to `breached.txt`.
 |---|---|
 | `main.py` | Application entry point — launches setup dialog then login window |
 | `login.py` | Master password setup dialog & login window |
-
 | `auth.py` | PBKDF2 hashing and verification of master password |
 | `gui.py` | Main PyQt5 vault interface (two-column layout, theme toggle) |
 | `database.py` | SQLite vault — encrypted CRUD operations |
